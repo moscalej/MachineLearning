@@ -5,7 +5,7 @@ from scipy.io import loadmat
 
 
 class Node:
-    def __init__(self, criteria, value, tipe,childs):
+    def __init__(self, criteria, value, tipe,childs=[]):
         self.criteria=criteria
         self.value=value
         self.tipe=tipe
@@ -24,7 +24,11 @@ class Tree:
 
     def slit_tree(self, X, Y):
         if len(X) == 0:
-            node = Node('final', Y[0], 'final' ,None)
+             node = 'block'
+             return node
+        elif len(Y.unique()) != 2:
+            node =  Node('class',Y.values[0],None,None)
+            return node
         info = self.find_cut(X,Y)
         feature = info['feature']
         value = info['value']
@@ -35,7 +39,10 @@ class Tree:
             left_Y = Y[left_X.index]
             right_X = X[X[feature] > value].drop(columns=feature)
             right_Y =Y[right_X.index]
-            node = Node('le',value,'Node',[self.slit_tree(left_X,left_Y),self.slit_tree(right_X,right_Y)])
+            node_left = self.slit_tree(left_X,left_Y)
+            node_right=self.slit_tree(right_X, right_Y)
+            node = Node('le',value,'Node',[node_left,node_right])
+            return node
 
         else:
             left_X = X[X[feature] > value].drop(columns=feature)
@@ -43,6 +50,7 @@ class Tree:
             right_X = X[X[feature] <= value].drop(columns=feature)
             right_Y = Y[right_X.index]
             node = Node('g', value, 'Node', [self.slit_tree(left_X,left_Y),self.slit_tree(right_X,right_Y)])
+            return node
 
         return node
 
@@ -93,9 +101,10 @@ class Tree:
 
 if __name__ == '__main__':
     from sklearn.model_selection import train_test_split
-    a = loadmat(r'C:\Users\amoscoso\Documents\Technion\MachineLearning\data\BreastCancerData.mat',appendmat=False)
+    a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
     x = pd.DataFrame(a['X'].T)
     y = pd.Series(a['y'].reshape(-1))
     train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=20)
     tree = Tree(10)
     tree.fit(train_x,train_y)
+    b="op"
