@@ -116,7 +116,7 @@ class Tree:
         :return:
         {'score':gini ,'criterion':'le' or 'g','value': value ,'feature': wicch feature should cut}
         """
-        result = self._min_loss_cut(X[1], Y)
+        result = self._min_loss_cut(X[0], Y)
         for feature in tqdm(X.columns):
             feature_r  = self._min_loss_cut(X[feature], Y)
             if feature_r['score'] <= result['score']:
@@ -168,16 +168,30 @@ class RandonForest():
 
 
 
-if __name__ == '__main__':
-    from sklearn.model_selection import train_test_split
-    a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
-    x = pd.DataFrame(a['X'].T)
-    y = pd.Series(a['y'].reshape(-1))
-    results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [10,50,70])
-    for col in results.columns:
-        for row in results.index:
-            train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=row,test_size=300)
-            tree = Tree(10, col)
-            tree.fit(train_x,train_y)
-            results.loc[row,col]=tree.score(test_x, test_y)
+
+from sklearn.model_selection import train_test_split
+a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
+x = pd.DataFrame(a['X'].T)
+y = pd.Series(a['y'].reshape(-1))
+    #%%
+results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [10,50,70])
+for col in results.columns:
+    for row in results.index:
+        train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=row,test_size=300)
+        tree = Tree(10, col)
+        tree.fit(train_x,train_y)
+        results.loc[row,col]=tree.score(test_x, test_y)
+
+
+#%%
+value =[]
+x_val = np.arange(0.1,0.85,0.08)
+for i in x_val:
+
+    train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=i,test_size=0.2)
+    tree = Tree(10, 'Enthropy')
+    tree.fit(train_x,train_y)
+    value.append(tree.score(test_x, test_y))
+
+#%%
 
