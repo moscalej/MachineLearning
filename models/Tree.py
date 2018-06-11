@@ -117,7 +117,7 @@ class Tree:
         {'score':gini ,'criterion':'le' or 'g','value': value ,'feature': wicch feature should cut}
         """
         result = self._min_loss_cut(X[0], Y)
-        for feature in tqdm(X.columns):
+        for feature in X.columns:
             feature_r  = self._min_loss_cut(X[feature], Y)
             if feature_r['score'] <= result['score']:
                 result = feature_r
@@ -174,13 +174,23 @@ a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData
 x = pd.DataFrame(a['X'].T)
 y = pd.Series(a['y'].reshape(-1))
     #%%
-results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [10,50,70])
-for col in results.columns:
-    for row in results.index:
-        train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=row,test_size=300)
-        tree = Tree(10, col)
-        tree.fit(train_x,train_y)
-        results.loc[row,col]=tree.score(test_x, test_y)
+results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [0.8])
+
+
+train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=0.8,test_size=0.2)
+tree = Tree(10, 'GiniIndex')
+tree.fit(train_x,train_y)
+tree_c = Tree(10, 'ClassificationError')
+tree_c.fit(train_x,train_y)
+tree_1 = Tree(10, 'Enthropy')
+tree_1.fit(train_x,train_y)
+results.loc[0.8,'GiniIndex']=tree.score(test_x, test_y)
+results.loc[0.8,'ClassificationError']=tree_c.score(test_x, test_y)
+results.loc[0.8,'Enthropy']=tree_1.score(test_x, test_y)
+
+"""
+" normally you don't train a tree with all your data, each time you train a tree it will over fit the training data in to the tree (each tree remembers all the decisions) the best you can do with decision trees is to make a kfold with your training data and for each fold make a tree and train, then for predict you run your data for all the trees and take the arg max of then (that is a random forest)
+"""
 
 
 #%%
@@ -194,4 +204,5 @@ for i in x_val:
     value.append(tree.score(test_x, test_y))
 
 #%%
+plt.plot(x_val,value)
 
