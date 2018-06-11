@@ -173,7 +173,7 @@ if __name__ == '__main__':
     a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
     x = pd.DataFrame(a['X'].T)
     y = pd.Series(a['y'].reshape(-1))
-    results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [40,70,99])
+    results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [200])
     for col in results.columns:
         for row in results.index:
             train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=row,test_size=300)
