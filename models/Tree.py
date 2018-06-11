@@ -31,9 +31,9 @@ def los_fact(criretion):
         y0 = float(np.sum(y == 0)) / y.shape[0]
         y1 = float(np.sum(y == 1)) / y.shape[0]
         return 1 - max(y0, y1)
-    return dict(ClassificationError= calc_entropy,
+    return dict(Enthropy= calc_entropy,
                 GiniIndex=calc_gini_index ,
-                Enthropy=calc_classification_error )[criretion]
+                 ClassificationError=calc_classification_error )[criretion]
 
 
 class Node:
