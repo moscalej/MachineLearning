@@ -90,11 +90,11 @@ class Tree:
             return Node(np.argmax([np.sum(Y_labels == 0), np.sum(Y_labels == 1)]), 'leaf', 'leaf', [], [sum(Y_labels == 0), sum(Y_labels == 1)])
         if len(X_data) == 0:
             raise Exception(f'We build and error node on the fit with depht {depht} and y:{Y_labels.shape}')
-            node = Node('Error', 'Error', -1, [],[0,0])
-            return node
         elif len(Y_labels.unique()) != 2:
             node = Node(Y_labels.values[0], 'leaf', 'leaf', [], [sum(Y_labels == 0), sum(Y_labels == 1)])
             return node
+
+
         info = self._find_cut(X_data, Y_labels)
         feature = info['feature']
         value = info['value']
@@ -106,6 +106,8 @@ class Tree:
         if self.dropping == True:
             right_x = right_x.drop(columns=feature)
         right_y =Y_labels[right_x.index]
+
+
 
         if len(left_y) == 0 :
             return Node(np.argmax([np.sum(right_y == 0), np.sum(right_y == 1)]),
