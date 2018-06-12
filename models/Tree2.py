@@ -238,8 +238,8 @@ def GetTrainAndTestForCV(Train_x,Train_y,i):
 
 def PlotResultCV(err1, err2, err3):
     x = [1, 2, 3]
-    y = np.array(err1['mean'], err2['mean'], err3['mean'])
-    e = np.array(err1['std'], err2['std'], err3['std'])
+    y = np.array([err1['mean'], err2['mean'], err3['mean']])
+    e = np.array([err1['std'], err2['std'], err3['std']])
     plt.errorbar(x, y, e, linestyle='None', marker='^')
 
     plt.xlabel('x:1=GiniIndex,2=ClassificationError,3=Enthropy')
@@ -250,7 +250,21 @@ def PlotResultCV(err1, err2, err3):
 
 
 if __name__ == '__main__':
-    # from sklearn.model_selection import train_test_split
+    # todo:remove
+    errorsDict = {}
+    errorsDict['GiniIndex'] = [0.0444444444444444,0.11111111111111116,0.0444444444444444,0.0888888888888889,0.11111111111111116,
+                   0.0444444444444444,0.0444444444444444,0.0,0.0444444444444444,0.0888888888888889]
+
+    errorsDict['ClassificationError'] = [0.11111111111111116,0.11111111111111116,0.06666666666666665,
+                               0.11111111111111116,0.1333333333333333,0.0444444444444444,0.022222222222222254,0.022222222222222254,0.0444444444444444,0.1333333333333333]
+
+    errorsDict['Enthropy']= [0.11111111111111116,   0.0888888888888889,   0.0888888888888889,   0.0888888888888889,   0.0888888888888889,
+    0.0444444444444444,   0.022222222222222254,   0.0,   0.0444444444444444,   0.0888888888888889]
+    # todo:remove
+
+
+
+    from sklearn.model_selection import train_test_split
     X, Y = GetDataFromMatlab(r'/home/gilshoshan/Documents/Ml/MachineLearning/Data/BreastCancerData.mat')
     Train_x, Test_x, Train_y, Test_y = SplitDataToTrainAndTestSet(X, Y)
     # a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
@@ -262,6 +276,7 @@ if __name__ == '__main__':
     error = {}
     for col in results.columns:
         error[col] = {}
+        '''
         error[col]['val'] = []
         print('check col ' + col)
         for cv in range(10):
@@ -274,23 +289,29 @@ if __name__ == '__main__':
             results.loc[cv, col] = 1 - tree.score(val_x, val_y)
             print('error = ' + str(results.loc[cv, col]))
             error[col]['val'].append(results.loc[cv, col])
+
+
+        '''
+        error[col]['val'] = errorsDict[col]#todo:remove
         error[col]['mean'] = np.mean(error[col]['val'])
         error[col]['std'] = np.std(error[col]['val'])
 
     PlotResultCV(error['GiniIndex'], error['ClassificationError'], error['Enthropy'])
 
-    bestClassifier = results.columns[np.argmax([error[col]['mean'] for col in results.columns])]
+    Train_x = pd.DataFrame(Train_x)
+    Train_y = pd.Series(Train_y)
+    Test_x = pd.DataFrame(Test_x)
+    Test_y = pd.Series(Test_y)
+    bestClassifier = results.columns[np.argmin([error[col]['mean'] for col in results.columns])]
     print('best classifier is ' + bestClassifier)
     # train on all data
     trainTree = Tree(10, bestClassifier)
-    trainTree.fit(train_x, train_y)
-    valErr = 1 - trainTree.score(train_x, train_y)
-    print('error on validaion set is: ' + str(valErr))
+    trainTree.fit(Train_x, Train_y)
+    valErr = 1 - trainTree.score(Train_x, Train_y)
+    print('error on train set is: ' + str(valErr))
     # test set
-    testTree = Tree(10, bestClassifier)
-    testTree.fit(train_x, train_y)
-    testErr = 1 - trainTree.score(train_x, train_y)
-    print('error on validaion set is: ' + str(testErr))
+    testErr = 1 - trainTree.score(Test_x, Test_y)
+    print('error on test set is: ' + str(testErr))
 
     print('finish!')
 
