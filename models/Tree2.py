@@ -251,10 +251,10 @@ def PlotResultCV(err1, err2, err3):
 
 if __name__ == '__main__':
     # from sklearn.model_selection import train_test_split
-    X, Y = GetDataFromMatlab('BreastCancerData.mat')
+    X, Y = GetDataFromMatlab(r'/home/gilshoshan/Documents/Ml/MachineLearning/Data/BreastCancerData.mat')
     Train_x, Test_x, Train_y, Test_y = SplitDataToTrainAndTestSet(X, Y)
     # a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
-    a = loadmat(r'BreastCancerData.mat', appendmat=False)
+    a = loadmat(r'/home/gilshoshan/Documents/Ml/MachineLearning/Data/BreastCancerData.mat', appendmat=False)
     x = pd.DataFrame(a['X'].T)
     y = pd.Series(a['y'].reshape(-1))
     # results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [10,50,99])

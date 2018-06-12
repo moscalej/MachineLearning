@@ -34,3 +34,6 @@ for i in tqdm(x_val):
 
 plt.plot(x_val,value)
 plt.title("Destion Tree presition as a function of Sample size")
+
+#%%
+
