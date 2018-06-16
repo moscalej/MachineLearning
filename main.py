@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.io import loadmat
 from sklearn.model_selection import KFold
+from sklearn.tree import DecisionTreeClassifier
 
 #%%
 a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
@@ -33,3 +34,6 @@ for i in tqdm(x_val):
 
 plt.plot(x_val,value)
 plt.title("Destion Tree presition as a function of Sample size")
+
+#%%
+

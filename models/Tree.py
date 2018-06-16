@@ -45,6 +45,8 @@ class Node:
         self.balance = balance
 
     def predict(self,x):
+        if self.node_type == 'Error':
+            raise Exception('We made a error node need to de-bug')
         if self.node_type == 'leaf':
             return self.value
         elif x[self.feature] <= self.value:
@@ -83,26 +85,37 @@ class Tree:
         return np.mean(self.predict(x) == y)
 
 
-    def _split_tree(self, X, Y, depht):
-        if len(X) == 0:
-             node = Node('Error', 'Error', -1, [],[0,0])
-             return node
-        elif len(Y.unique()) != 2:
-            node = Node(Y.values[0], 'leaf', 'leaf', [],[sum(Y==0),sum(Y==1)])
+    def _split_tree(self, X_data, Y_labels, depht):
+        if self.depht == depht or X_data.shape[1] == 1:
+            return Node(np.argmax([np.sum(Y_labels == 0), np.sum(Y_labels == 1)]), 'leaf', 'leaf', [], [sum(Y_labels == 0), sum(Y_labels == 1)])
+        if len(X_data) == 0:
+            raise Exception(f'We build and error node on the fit with depht {depht} and y:{Y_labels.shape}')
+        elif len(Y_labels.unique()) != 2:
+            node = Node(Y_labels.values[0], 'leaf', 'leaf', [], [sum(Y_labels == 0), sum(Y_labels == 1)])
             return node
-        elif self.depht == depht or X.shape[1] == 1:
-            return Node(np.argmax([np.sum(Y == 0), np.sum(Y == 1)]), 'leaf', 'leaf', [],[sum(Y==0),sum(Y==1)])
-        info = self._find_cut(X, Y)
+
+
+        info = self._find_cut(X_data, Y_labels)
         feature = info['feature']
         value = info['value']
-        left_x = X[X[feature] <= value]
+        left_x = X_data[X_data[feature] <= value]
         if self.dropping == True:
             left_x =left_x.drop(columns=feature)
-        left_y = Y[left_x.index]
-        right_x = X[X[feature] > value]
+        left_y = Y_labels[left_x.index]
+        right_x = X_data[X_data[feature] > value]
         if self.dropping == True:
             right_x = right_x.drop(columns=feature)
-        right_y =Y[right_x.index]
+        right_y =Y_labels[right_x.index]
+
+
+
+        if len(left_y) == 0 :
+            return Node(np.argmax([np.sum(right_y == 0), np.sum(right_y == 1)]),
+                        'leaf', 'leaf', [], [sum(right_y == 0), sum(right_y == 1)])
+        if len(right_y) == 0 :
+            return Node(np.argmax([np.sum(left_y == 0), np.sum(left_y == 1)]),
+                        'leaf', 'leaf', [], [sum(left_y == 0), sum(left_y == 1)])
+
         node_left = self._split_tree(left_x, left_y, depht + 1)
         node_right= self._split_tree(right_x, right_y, depht + 1)
         node = Node(value, feature, 'Desition', [node_left, node_right],[left_y.size,right_y.size])
@@ -170,23 +183,23 @@ class RandonForest():
 
 
 from sklearn.model_selection import train_test_split
-a = loadmat(r'D:\Ale\Documents\Technion\ML\MachineLearning\Data\BreastCancerData.mat',appendmat=False)
+a = loadmat(r'C:\Users\amoscoso\Documents\Technion\MachineLearning\data\BreastCancerData.mat',appendmat=False)
 x = pd.DataFrame(a['X'].T)
 y = pd.Series(a['y'].reshape(-1))
     #%%
 results = pd.DataFrame(columns = ['GiniIndex','ClassificationError', 'Enthropy'], index= [0.8])
 
 
-train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=0.8,test_size=0.2)
-tree = Tree(10, 'GiniIndex')
-tree.fit(train_x,train_y)
+train_x , test_x, train_y, test_y = train_test_split(x,y,train_size=200,test_size=0.2, random_state=42)
+# tree = Tree(10, 'GiniIndex')
+# tree.fit(train_x,train_y)
 tree_c = Tree(10, 'ClassificationError')
 tree_c.fit(train_x,train_y)
-tree_1 = Tree(10, 'Enthropy')
-tree_1.fit(train_x,train_y)
-results.loc[0.8,'GiniIndex']=tree.score(test_x, test_y)
+# tree_1 = Tree(10, 'Enthropy')
+# tree_1.fit(train_x,train_y)
+# results.loc[0.8,'GiniIndex']=tree.score(test_x, test_y)
 results.loc[0.8,'ClassificationError']=tree_c.score(test_x, test_y)
-results.loc[0.8,'Enthropy']=tree_1.score(test_x, test_y)
+# results.loc[0.8,'Enthropy']=tree_1.score(test_x, test_y)
 
 """
 " normally you don't train a tree with all your data, each time you train a tree it will over fit the training data in to the tree (each tree remembers all the decisions) the best you can do with decision trees is to make a kfold with your training data and for each fold make a tree and train, then for predict you run your data for all the trees and take the arg max of then (that is a random forest)
